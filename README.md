@@ -1,14 +1,13 @@
 # Raven Tree
 
 ---
-<p style="text-align: center"><img src="docs/ravenTree-logo.png" width="500"/></p>
+<p align="center"><img src="docs/ravenTree-logo.png" width="500"/></p>
 
-<p style="text-align: center">
+<p align="center">
 <a href="https://github.com/AndresXLP/ravenTree/releases/latest"><img src="https://img.shields.io/github/v/tag/AndresXLP/ravenTree?label=version" alt="Latest Version"></a>
-<a> <img src="https://github.com/AndresXLP/ravenTree/actions/workflows/CI.yml/badge.svg"> </a>
+<a href="https://github.com/AndresXLP/ravenTree/actions/"><img src="https://github.com/AndresXLP/ravenTree/actions/workflows/CI.yml/badge.svg"></a>
 <a href='https://coveralls.io/github/AndresXLP/ravenTree?branch=main'><img src='https://coveralls.io/repos/github/AndresXLP/ravenTree/badge.svg?branch=main' alt='Coverage Status' /></a>
-<a href="https://github.com/AndresXLP/ravenTree/blob/main/LICENSE"> <img src="https://img.shields.io/github/license/andresxlp/ravenTree
-"></a>
+<a href="https://github.com/AndresXLP/ravenTree/blob/main/LICENSE"> <img src="https://img.shields.io/github/license/andresxlp/ravenTree"></a>
 </p>
 
 ---
