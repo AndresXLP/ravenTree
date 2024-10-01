@@ -1,4 +1,4 @@
-package ravenTree
+package ravenTree_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AndresXLP/ravenTree/utils_tests"
+	"github.com/AndresXLP/ravenTree"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -40,19 +40,19 @@ var (
 
 type ravenTreeTestSuite struct {
 	suite.Suite
-	underTest Tree
+	underTest ravenTree.Tree
 }
 
 func TestRavenTreeSuite(t *testing.T) {
-	utils.RunServerTesting()
+	RunServerTesting()
 	suite.Run(t, new(ravenTreeTestSuite))
 }
 func (suite *ravenTreeTestSuite) SetupTest() {
-	suite.underTest = NewRavensTree()
+	suite.underTest = ravenTree.NewRavensTree()
 }
 
 func (suite *ravenTreeTestSuite) TestSendRaven_Success() {
-	options := &Options{
+	options := &ravenTree.Options{
 		Host:        "http://localhost:8080",
 		Path:        "/api/query-params",
 		Method:      http.MethodGet,
@@ -79,7 +79,7 @@ func (suite *ravenTreeTestSuite) TestSendRaven_Success() {
 }
 
 func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenTimedOut() {
-	options := &Options{
+	options := &ravenTree.Options{
 		Host:       "http://localhost:8080",
 		Path:       "/api/timeout",
 		Method:     http.MethodGet,
@@ -96,7 +96,7 @@ func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenTimedOut() {
 }
 
 func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetry() {
-	options := &Options{
+	options := &ravenTree.Options{
 		Host:       "http://localhost:8080",
 		Path:       "/api/retry",
 		Method:     http.MethodGet,
@@ -110,7 +110,7 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetry() {
 }
 
 func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenInvalidURL() {
-	options := &Options{
+	options := &ravenTree.Options{
 		Host:       ":foo",
 		Path:       "/api/retry",
 		Method:     http.MethodGet,
@@ -124,7 +124,7 @@ func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenInvalidURL() {
 }
 
 func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenInvalidPath() {
-	options := &Options{
+	options := &ravenTree.Options{
 		Host:       "http://localhost:8080",
 		Path:       ":foo",
 		Method:     http.MethodGet,
@@ -138,7 +138,7 @@ func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenInvalidPath() {
 }
 
 func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenInvalidBody() {
-	options := &Options{
+	options := &ravenTree.Options{
 		Host:       "http://localhost:8080",
 		Path:       "/api/retry",
 		Method:     http.MethodGet,
@@ -153,7 +153,7 @@ func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenInvalidBody() {
 }
 
 func (suite *ravenTreeTestSuite) TestSendRaven_FailRequestInvalidMethod() {
-	options := &Options{
+	options := &ravenTree.Options{
 		Host:       "http://localhost:8080",
 		Path:       "/api/retry",
 		Method:     "😰",

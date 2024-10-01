@@ -7,7 +7,6 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/gojektech/heimdall/v6/httpclient"
-	"github.com/labstack/echo/v4"
 )
 
 // Tree defines the methods that any implementation of a RavenTree must provide.
@@ -50,6 +49,11 @@ func NewRavensTree() Tree {
 
 const (
 	zero = 0
+
+	HeaderContentType = "Content-Type"
+
+	// MIMEApplicationJSON JavaScript Object Notation (JSON) https://www.rfc-editor.org/rfc/rfc8259
+	MIMEApplicationJSON = "application/json"
 )
 
 func (u *raven) SendRaven(ctx context.Context, opt *Options) (WrapperResponse, error) {
@@ -81,7 +85,7 @@ func (u *raven) SendRaven(ctx context.Context, opt *Options) (WrapperResponse, e
 		return WrapperResponse{}, err
 	}
 
-	req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Add(HeaderContentType, MIMEApplicationJSON)
 
 	if len(opt.Headers) > zero {
 		for key, value := range opt.Headers {
