@@ -50,6 +50,8 @@ func getRetry(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set(ravenTree.HeaderContentType, ravenTree.MIMEApplicationJSON)
 
+	// Lock to prevent race conditions in case of concurrent requests
+	mu.Lock()
 	if try == 3 {
 		log.Infof("Successful request on the %drd attempt", try)
 		w.WriteHeader(http.StatusOK)
@@ -63,10 +65,9 @@ func getRetry(w http.ResponseWriter, r *http.Request) {
 		log.Infof("Trying to retry %d", try)
 	}
 
-	// Lock to prevent race conditions in case of concurrent requests
-	mu.Lock()
 	try += 1
 	mu.Unlock()
+
 	time.Sleep(3 * time.Second) // Simulate delay for retries
 
 	w.WriteHeader(http.StatusOK)
