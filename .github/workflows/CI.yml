@@ -16,7 +16,7 @@ jobs:
             
     - name: Run Unit tests
       run: |
-        go test -covermode atomic -coverprofile=covprofile ./...
+        go test -race -covermode atomic -coverprofile=covprofile ./...
         
     - name: Install goveralls
       run: go install github.com/mattn/goveralls@latest
