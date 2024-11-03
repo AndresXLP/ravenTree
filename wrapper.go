@@ -24,7 +24,7 @@ type WrapperResponse struct {
 //     the JSON structure.
 //
 // Returns:
-// - error: Returns an error if the reading of the body or the unmarshaling process fails.
+// - error: Returns an error if the reading of the body or the unmarshalling process fails.
 func (w *WrapperResponse) ParseBodyTo(dest interface{}) error {
 	bodyBytes, _ := io.ReadAll(w.Body)
 	w.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))

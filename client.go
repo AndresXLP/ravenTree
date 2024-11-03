@@ -3,10 +3,15 @@ package ravenTree
 import (
 	"context"
 	"net/http"
-	"os"
+	"time"
+)
 
-	"github.com/charmbracelet/log"
-	"github.com/gojektech/heimdall/v6/httpclient"
+const (
+	zero              = 0
+	defaultTimeout    = 30 * time.Second
+	HeaderContentType = "Content-Type"
+	// MIMEApplicationJSON JavaScript Object Notation (JSON) https://www.rfc-editor.org/rfc/rfc8259
+	MIMEApplicationJSON = "application/json"
 )
 
 // Tree defines the methods that any implementation of a RavenTree must provide.
@@ -34,41 +39,27 @@ type Tree interface {
 	SendRaven(ctx context.Context, opt *Options) (WrapperResponse, error)
 }
 
-type raven struct{}
+type raven struct {
+	client *http.Client
+}
 
 // NewRavensTree creates and returns a new instance of the RavenTree interface.
 //
-// It returns an instance of `raven`, a private struct that implements the `Tree` interface.
-// This function acts as a constructor for the `Tree` implementation.
+// This function acts as a constructor for the RavenTree implementation, returning
+// an instance of `raven`, a private struct that implements the `Tree` interface.
+// The returned instance includes an internal `http.Client` configured with a default timeout.
 //
 // Returns:
-// - Tree: An object that implements the RavenTree interface.
+// - Tree: An object that implements the RavenTree interface with a pre-configured HTTP client.
 func NewRavensTree() Tree {
-	return &raven{}
+	return &raven{
+		client: &http.Client{
+			Timeout: defaultTimeout,
+		},
+	}
 }
 
-const (
-	zero = 0
-
-	HeaderContentType = "Content-Type"
-
-	// MIMEApplicationJSON JavaScript Object Notation (JSON) https://www.rfc-editor.org/rfc/rfc8259
-	MIMEApplicationJSON = "application/json"
-)
-
-func (u *raven) SendRaven(ctx context.Context, opt *Options) (WrapperResponse, error) {
-	log.SetOutput(os.Stdout)
-
-	var opts []httpclient.Option
-
-	if opt.Timeout > zero {
-		opts = append(opts, httpclient.WithHTTPTimeout(opt.Timeout))
-	}
-
-	if opt.RetryCount > zero {
-		opts = append(opts, httpclient.WithRetryCount(opt.RetryCount))
-	}
-
+func (r *raven) SendRaven(ctx context.Context, opt *Options) (WrapperResponse, error) {
 	URL, err := opt.buildURL()
 	if err != nil {
 		return WrapperResponse{}, err
@@ -79,27 +70,44 @@ func (u *raven) SendRaven(ctx context.Context, opt *Options) (WrapperResponse, e
 		return WrapperResponse{}, err
 	}
 
-	client := httpclient.NewClient(opts...)
-	req, err := http.NewRequestWithContext(ctx, opt.Method, URL, &body)
-	if err != nil {
-		return WrapperResponse{}, err
+	opt.defaultOptions()
+
+	resp := &http.Response{}
+	errs := ErrCollections{}
+
+	if opt.Timeout != time.Duration(0) {
+		r.client.Timeout = opt.Timeout
 	}
 
-	req.Header.Add(HeaderContentType, MIMEApplicationJSON)
-
-	if len(opt.Headers) > zero {
-		for key, value := range opt.Headers {
-			req.Header.Add(key, value)
+	for i := 0; i < opt.RetryCount; i++ {
+		req, err := http.NewRequestWithContext(ctx, opt.Method, URL, &body)
+		if err != nil {
+			return WrapperResponse{}, err
 		}
+
+		req.Header.Add(HeaderContentType, MIMEApplicationJSON)
+
+		if len(opt.Headers) > zero {
+			for key, value := range opt.Headers {
+				req.Header.Add(key, value)
+			}
+		}
+
+		resp, err = r.client.Do(req)
+		if err != nil {
+			errs.Add(err.Error())
+			opt.BackoffStrategy.Next(opt.MaxBackoffDelay)
+			continue
+		}
+
+		if resp.StatusCode >= http.StatusInternalServerError {
+			opt.BackoffStrategy.Next(opt.MaxBackoffDelay)
+			continue
+		}
+
+		errs.CleanCollection()
+		break
 	}
 
-	log.Info("Raven Send to...",
-		"URL", URL,
-		"Method", opt.Method,
-		"Body", opt.Body,
-	)
-
-	resp, err := client.Do(req)
-
-	return WrapperResponse{resp}, err
+	return WrapperResponse{resp}, errs.HasError()
 }

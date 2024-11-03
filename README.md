@@ -26,26 +26,36 @@ go get github.com/AndresXLP/ravenTree
 ```go 
 package main
 
-import "github.com/AndresXLP/ravenTree"
+import (
+  "context"
+  "log"
+  "net/http"
+  "time"
+
+  "github.com/AndresXLP/ravenTree"
+)
 
 func main() {
-	tree := ravenTree.NewRavensTree()
+  tree := ravenTree.NewRavensTree()
 
-	options := &ravenTree.Options{
-		Host:        "http://localhost:8080",
-		Path:        "/api/resource",
-		Method:      http.MethodGet,
-		QueryParams: map[string]string{"key": "value"},
-		Headers:     map[string]string{"Authorization": "Bearer token"},
-		Timeout:     5 * time.Second,
-		RetryCount:  3,
-	}
+  options := &ravenTree.Options{
+    Host:            "http://localhost:8080",
+    Path:            "/api/resource",
+    Method:          http.MethodGet,
+    QueryParams:     map[string]string{"code": "123"},
+    Headers:         map[string]string{"Authorization": "Bearer 1234"},
+    Timeout:         5 * time.Second,
+    RetryCount:      3,
+    BackoffStrategy: ravenTree.BackoffLineal(),
+    MaxBackoffDelay: 10 * time.Second,
+  }
 
-	response, err := tree.SendRaven(context.Background(), options)
-	if err != nil {
-		log.Fatal(err)
-	}
+  _, err := tree.SendRaven(context.Background(), options)
+  if err != nil {
+    log.Fatal(err)
+  }
 }
+
 ```
 ---
 ### Methods Provided
@@ -59,10 +69,17 @@ By default, the ***Content-Type*** header is set to ***application/json***.
 
 You can add additional headers and query parameters using the **Headers** and **QueryParams** fields in the Options struct.
 
-### Timeout and Retry Options
+### Timeout, Retry and Backoff Options
 - **Timeout**: Specifies the maximum duration for a request. If the request takes longer than this duration, it will be aborted, and an error will be returned.
   </br></br>
 - **RetryCount**: Specifies the number of times to retry the request if it fails. This is useful for handling transient errors or network issues. The library will automatically retry the request up to the specified number of attempts.
+  </br></br>
+- **BackoffStrategy:** Defines the strategy for the delay between retry attempts when a request fails. By controlling the backoff, you can reduce strain on the system or network and increase the chances of successful retries. There are three types of backoff strategies:
+  - `Default`: No additional delay between retries.
+  - `Lineal`: Adds a lineal delay increment after each retry, increasing gradually.
+  - `Exponential`: Doubles the delay after each retry, allowing for a progressively increasing wait time.
+  </br></br>
+- **MaxBackoffDelay:** Sets an upper limit on the delay between retry attempts when using the `Lineal` or `Exponential` backoff strategies. This cap ensures that the backoff delay does not exceed a specific duration, preventing excessively long wait times during retries. If not explicitly set, the default value is 10 seconds.
 
 ### Error Handling
 Always check for errors after calling SendRaven. If the request fails, the error will provide information about what went wrong.
@@ -71,13 +88,6 @@ Always check for errors after calling SendRaven. If the request fails, the error
 The name Raven **Tree reflects** the connection to the mystical ravens that serve as messengers in both Game of Thrones and Norse mythology, symbolizing communication, wisdom, and the passage of information.
 
 Just as these ravens carry messages across great distances, **Raven Tree** aims to facilitate seamless communication between your application and external APIs.
-
----
-## Package Dependency
-
-Raven Tree depends on <a href="https://github.com/gojek/heimdall" >
-<img src="https://github.com/gojek/heimdall/blob/master/doc/heimdall-logo.png?raw=true" width="25"/> Heimdall
-</a>, a powerful HTTP client that provides features like timeouts and retries, making it an essential component for managing HTTP requests in a robust and resilient manner.
 
 ---
 
