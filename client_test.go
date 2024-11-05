@@ -64,7 +64,6 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWithDefaultOptions() {
 		suite.Equal(http.MethodGet, r.Method)
 
 		w.WriteHeader(http.StatusOK)
-		return
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(handler))
@@ -104,7 +103,6 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWithHeadersAndQueryParams(
 
 		// Encode the response into JSON and write it to the response writer
 		_ = json.NewEncoder(w).Encode(resp)
-		return
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(handler))
@@ -148,10 +146,10 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithoutBackoffStr
 			log.Printf("Successful request on attempt # %d", try)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{}`)) // Empty JSON response
-			return
 		}
 
 		log.Printf("Attempt # %d", try)
+
 		try++
 		mu.Unlock()
 
@@ -171,9 +169,10 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithoutBackoffStr
 
 	since := time.Now()
 	_, err := suite.underTest.SendRaven(ctx, options)
+	suite.NoError(err)
+
 	duration := time.Since(since)
 	expectedDuration := 3 * time.Second
-	suite.NoError(err)
 	suite.True(duration > expectedDuration && duration < expectedDuration+50*time.Millisecond)
 }
 
@@ -192,15 +191,14 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffLineal
 			log.Printf("Successful request on attempt # %d", try)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{}`)) // Empty JSON response
-			return
 		}
 
 		log.Printf("Attempt # %d", try)
+
 		try++
 		mu.Unlock()
 
 		time.Sleep(3 * time.Second) // Simulate delay for retries
-		return
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(handler))
@@ -218,9 +216,10 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffLineal
 
 	since := time.Now()
 	_, err := suite.underTest.SendRaven(ctx, options)
+	suite.NoError(err)
+
 	duration := time.Since(since)
 	expectedDuration := 9 * time.Second
-	suite.NoError(err)
 	suite.True(duration > expectedDuration && duration < expectedDuration+50*time.Millisecond)
 }
 
@@ -239,10 +238,10 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffExpone
 			log.Printf("Successful request on attempt # %d", try)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{}`)) // Empty JSON response
-			return
 		}
 
 		log.Printf("Attempt # %d", try)
+
 		try++
 		mu.Unlock()
 
@@ -264,9 +263,10 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffExpone
 
 	since := time.Now()
 	_, err := suite.underTest.SendRaven(ctx, options)
+	suite.NoError(err)
+
 	duration := time.Since(since)
 	expectedDuration := 19 * time.Second
-	suite.NoError(err)
 	suite.True(duration > expectedDuration && duration < expectedDuration+50*time.Millisecond)
 }
 
@@ -278,7 +278,6 @@ func (suite *ravenTreeTestSuite) TestSendRaven_FailWhenTimedOut() {
 		suite.Equal(http.MethodGet, r.Method)
 
 		time.Sleep(2 * time.Second)
-		return
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(handler))

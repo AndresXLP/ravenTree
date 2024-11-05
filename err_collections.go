@@ -22,6 +22,7 @@ func (ec *ErrCollections) Error() string {
 	errsMessages := make([]string, len(ec.errs))
 	ec.mutex.Lock()
 	defer ec.mutex.Unlock()
+
 	for i, e := range ec.errs {
 		errsMessages[i] = fmt.Sprintf("%s\n", e.Error())
 	}
@@ -32,6 +33,7 @@ func (ec *ErrCollections) Error() string {
 func (ec *ErrCollections) HasError() error {
 	ec.mutex.Lock()
 	defer ec.mutex.Unlock()
+
 	if len(ec.errs) == 0 {
 		return nil
 	}

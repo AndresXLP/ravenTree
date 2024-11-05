@@ -1,0 +1,47 @@
+linters:
+  disable-all: true
+  enable:
+    - unused
+    - goconst
+    - gofmt
+    - goimports
+    - mnd
+    - gosimple
+    - govet
+    - unparam
+    - nilerr
+    - errcheck
+    - errorlint
+    - exhaustive
+    - ineffassign
+    - predeclared
+    - typecheck
+    - asciicheck
+    - lll
+    - wsl
+    - prealloc
+    - nestif
+    - misspell
+    - makezero
+    - gocognit
+    - varnamelen
+    - noctx
+    - copyloopvar
+
+linters-settings:
+  varnamelen:
+    min-name-length: 2
+    ignore-decls:
+      - c echo.Context
+      - t testing.T
+      - w http.ResponseWriter
+      - r *http.Request
+
+
+issues:
+  exclude-dirs:
+    - mocks
+  exclude-rules:
+    - linters:
+        - unused
+      source: "tableName"

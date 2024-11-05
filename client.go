@@ -97,15 +97,18 @@ func (r *raven) SendRaven(ctx context.Context, opt *Options) (WrapperResponse, e
 		if err != nil {
 			errs.Add(err.Error())
 			opt.BackoffStrategy.Next(opt.MaxBackoffDelay)
+
 			continue
 		}
 
 		if resp.StatusCode >= http.StatusInternalServerError {
 			opt.BackoffStrategy.Next(opt.MaxBackoffDelay)
+
 			continue
 		}
 
 		errs.CleanCollection()
+
 		break
 	}
 

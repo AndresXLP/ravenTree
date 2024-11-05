@@ -61,6 +61,7 @@ func (b *BackoffStrategy) Next(maxDelay time.Duration) {
 	case Lineal:
 		time.Sleep(b.BackoffDelay)
 		b.BackoffDelay += 1 * time.Second
+
 		if b.BackoffDelay > maxDelay {
 			b.BackoffDelay = maxDelay
 		}
@@ -68,6 +69,7 @@ func (b *BackoffStrategy) Next(maxDelay time.Duration) {
 	case Exponential:
 		time.Sleep(b.BackoffDelay)
 		b.BackoffDelay *= 2
+
 		if b.BackoffDelay > maxDelay {
 			b.BackoffDelay = maxDelay
 		}

@@ -28,6 +28,7 @@ type WrapperResponse struct {
 func (w *WrapperResponse) ParseBodyTo(dest interface{}) error {
 	bodyBytes, _ := io.ReadAll(w.Body)
 	w.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	return json.Unmarshal(bodyBytes, dest)
 }
 
@@ -41,5 +42,6 @@ func (w *WrapperResponse) ParseBodyTo(dest interface{}) error {
 func (w *WrapperResponse) ParseBodyToString() string {
 	bodyBytes, _ := io.ReadAll(w.Body)
 	w.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	return string(bodyBytes)
 }
