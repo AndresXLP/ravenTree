@@ -29,8 +29,10 @@ func TestNewBackoff_WithDefaultValues(t *testing.T) {
 	backoff.Next()
 
 	elapsed := time.Since(since)
-	if elapsed != time.Duration(0) {
-		t.Errorf("Expected elapsed to be 0, got %v", elapsed)
+
+	tolerance := 50 * time.Microsecond
+	if elapsed > tolerance {
+		t.Errorf("Expected elapsed to be within %v, got %v", tolerance, elapsed)
 	}
 }
 
@@ -60,8 +62,10 @@ func TestNewBackoff_WithBackoffOptionsLinealStrategy(t *testing.T) {
 	backoff.Next()
 
 	elapsed := time.Since(since)
-	if elapsed > customBackoffDelay+50*time.Millisecond {
-		t.Errorf("Expected elapsed to be %v, got %v", customBackoffDelay+50*time.Millisecond, elapsed)
+
+	tolerance := customBackoffDelay + 50*time.Millisecond
+	if elapsed > tolerance {
+		t.Errorf("Expected elapsed to be %v, got %v", tolerance, elapsed)
 	}
 }
 
@@ -84,8 +88,10 @@ func TestNewBackoff_WithBackoffOptionsExponentialStrategy(t *testing.T) {
 	backoff.Next()
 
 	elapsed := time.Since(since)
-	if elapsed > backoffDelayExpected+50*time.Millisecond {
-		t.Errorf("Expected elapsed to be %v, got %v", backoffDelayExpected+50*time.Millisecond, elapsed)
+
+	tolerance := backoffDelayExpected + 50*time.Millisecond
+	if elapsed > tolerance {
+		t.Errorf("Expected elapsed to be %v, got %v", tolerance, elapsed)
 	}
 }
 
@@ -106,8 +112,10 @@ func TestNewBackoff_WithBackoffOptionsMaxDelayLessThanBackoffDelay(t *testing.T)
 	backoff.Next()
 
 	elapsed := time.Since(since)
-	if elapsed > overrideDelay+50*time.Millisecond {
-		t.Errorf("Expected elapsed to be %v, got %v", overrideDelay+50*time.Millisecond, elapsed)
+
+	tolerance := overrideDelay + 50*time.Millisecond
+	if elapsed > tolerance {
+		t.Errorf("Expected elapsed to be %v, got %v", tolerance, elapsed)
 	}
 }
 
