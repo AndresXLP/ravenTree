@@ -146,6 +146,8 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithoutBackoffStr
 			log.Printf("Successful request on attempt # %d", try)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{}`)) // Empty JSON response
+
+			return
 		}
 
 		log.Printf("Attempt # %d", try)
@@ -191,6 +193,8 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffLineal
 			log.Printf("Successful request on attempt # %d", try)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{}`)) // Empty JSON response
+
+			return
 		}
 
 		log.Printf("Attempt # %d", try)
@@ -205,13 +209,14 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffLineal
 	defer server.Close()
 
 	options := &ravenTree.Options{
-		Host:            server.URL,
-		Path:            "/api/retry",
-		Method:          http.MethodGet,
-		Timeout:         1 * time.Second,
-		RetryCount:      5,
-		BackoffStrategy: ravenTree.BackoffLineal(),
-		MaxBackoffDelay: 3 * time.Second,
+		Host:       server.URL,
+		Path:       "/api/retry",
+		Method:     http.MethodGet,
+		Timeout:    1 * time.Second,
+		RetryCount: 5,
+		Backoff: ravenTree.NewBackoff(
+			ravenTree.WithStrategy(ravenTree.Lineal),
+		),
 	}
 
 	since := time.Now()
@@ -238,6 +243,8 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffExpone
 			log.Printf("Successful request on attempt # %d", try)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{}`)) // Empty JSON response
+
+			return
 		}
 
 		log.Printf("Attempt # %d", try)
@@ -252,13 +259,15 @@ func (suite *ravenTreeTestSuite) TestSendRaven_SuccessWhenRetryWithBackoffExpone
 	defer server.Close()
 
 	options := &ravenTree.Options{
-		Host:            server.URL,
-		Path:            "/api/retry",
-		Method:          http.MethodGet,
-		Timeout:         1 * time.Second,
-		RetryCount:      5,
-		BackoffStrategy: ravenTree.BackoffExponential(),
-		MaxBackoffDelay: 15 * time.Second,
+		Host:       server.URL,
+		Path:       "/api/retry",
+		Method:     http.MethodGet,
+		Timeout:    1 * time.Second,
+		RetryCount: 5,
+		Backoff: ravenTree.NewBackoff(
+			ravenTree.WithStrategy(ravenTree.Exponential),
+			ravenTree.WithMaxDelay(15*time.Second),
+		),
 	}
 
 	since := time.Now()

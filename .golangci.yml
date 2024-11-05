@@ -36,12 +36,11 @@ linters-settings:
       - t testing.T
       - w http.ResponseWriter
       - r *http.Request
+      - s strategy
+      - b *Backoff
+
 
 
 issues:
   exclude-dirs:
     - mocks
-  exclude-rules:
-    - linters:
-        - unused
-      source: "tableName"

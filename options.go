@@ -8,21 +8,19 @@ import (
 )
 
 const (
-	defaultRetryCount      = 1
-	defaultMaxBackoffDelay = 10 * time.Second
+	defaultRetryCount = 1
 )
 
 type Options struct {
-	Host            string
-	Path            string
-	Method          string
-	Body            interface{}
-	QueryParams     map[string]string
-	Headers         map[string]string
-	Timeout         time.Duration
-	RetryCount      int
-	BackoffStrategy *BackoffStrategy
-	MaxBackoffDelay time.Duration
+	Host        string
+	Path        string
+	Method      string
+	Body        interface{}
+	QueryParams map[string]string
+	Headers     map[string]string
+	Timeout     time.Duration
+	RetryCount  int
+	Backoff     *Backoff
 }
 
 // bodyToBufferBody serializes the Body field into JSON and stores it in a bytes.Buffer.
@@ -77,17 +75,11 @@ func (o *Options) buildURL() (string, error) {
 
 // defaultOptions sets default values for any unset fields in the Options struct.
 // If certain fields are not initialized by the user, this method assigns sensible defaults:
-//   - BackoffStrategy: Defaults to the standard backoff strategy.
-//   - MaxBackoffDelay: Defaults to 10 seconds.
-//   - Timeout: Defaults to 30 seconds.
+//   - Backoff: Default to the standard backoff.
 //   - RetryCount: Defaults to 1.
 func (o *Options) defaultOptions() {
-	if o.BackoffStrategy == nil {
-		o.BackoffStrategy = BackoffDefault()
-	}
-
-	if o.MaxBackoffDelay == zero {
-		o.MaxBackoffDelay = defaultMaxBackoffDelay
+	if o.Backoff == nil {
+		o.Backoff = NewBackoff()
 	}
 
 	if o.RetryCount == zero {
