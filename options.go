@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	defaultRetryCount = 1
+)
+
 type Options struct {
 	Host        string
 	Path        string
@@ -16,6 +20,7 @@ type Options struct {
 	Headers     map[string]string
 	Timeout     time.Duration
 	RetryCount  int
+	Backoff     *Backoff
 }
 
 // bodyToBufferBody serializes the Body field into JSON and stores it in a bytes.Buffer.
@@ -66,4 +71,18 @@ func (o *Options) buildURL() (string, error) {
 	}
 
 	return finalURL.String(), nil
+}
+
+// defaultOptions sets default values for any unset fields in the Options struct.
+// If certain fields are not initialized by the user, this method assigns sensible defaults:
+//   - Backoff: Default to the standard backoff.
+//   - RetryCount: Defaults to 1.
+func (o *Options) defaultOptions() {
+	if o.Backoff == nil {
+		o.Backoff = NewBackoff()
+	}
+
+	if o.RetryCount == zero {
+		o.RetryCount = defaultRetryCount
+	}
 }
